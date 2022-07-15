@@ -24,7 +24,9 @@
 					<span
 						class="bg-indigo-500 w-28 font-bold text-center text-gray-200 p-3 px-5 rounded-l"
 						>Password</span
-					><input v-model="password"
+					><input 
+						v-on:keyup.enter="loginHandler()"
+						v-model="password"
 						class="field text-sm text-gray-600 p-2 px-3 rounded-r w-full"
 						type="password"
 						placeholder=""
@@ -41,27 +43,34 @@
 </template>
 
 <script>
+import { mapFields } from "vuex-map-fields";
 export default {
    name: 'Login',
    data() {
       return {
          email: null,
-         password: null
+         password: null,
       }
    },
    methods: {
      async loginHandler() {
          const data = { 'email': this.email, 'password': this.password }
-         // console.log(data);
          try{
-            const response = await this.$auth.loginWith('local', { data: data})
-            console.log(response)
-            this.$auth.$storage.setUniversal('email', response.data.email)
-            await this.$auth.setUserToken(response.data.access_token, response.data.refresh_token)
-            this.$router.push('/signup')
+           const response = await this.$auth.loginWith('local', { data: data})
+           this.$auth.$storage.setUniversal('email', response.data.email)
+           await this.$auth.setUserToken(response.data.access_token, response.data.refresh_token)
+           if(response.data.username) {
+	           this.$router.push("/");
+		        this.$store.dispatch("base/DataTable");
+		        this.$store.dispatch("base/UsersList");
+	           this.$toast.success('Successfully Logged In!')
+           }
+           else {
+           	this.$toast.error(response.data.message)
+           }
                                                                                                             
          } catch(e) {
-            console.log(e.message)
+            this.$toast.error('Invalid credentials')
          }
       }
    }

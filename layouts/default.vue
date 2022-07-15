@@ -12,7 +12,10 @@ export default {
     name: "default",
     data: () => ({}),
     created() {
-        this.$store.dispatch("base/DataTable");
+        if(this.$auth.user) {
+            this.$store.dispatch("base/DataTable");
+            this.$store.dispatch("base/UsersList");
+        }
     },
     mounted() {
         this.$nextTick(() => {});
